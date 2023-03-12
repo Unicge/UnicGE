@@ -1,0 +1,103 @@
+-- Define a macro that creates a new record type
+
+macro new_record(base: type?, name: string): type
+
+-- Create a new record type with the given name
+
+  local newtype = @record{} 
+newtype.name = name
+
+-- If there is a base type, copy its fields and methods to the new type
+
+if base then
+
+-- Indicates that the new type inherits from the base type
+
+newtype < base
+
+-- Copy fields from the base type to the new type using the copy_fields macro
+
+##copy_fields(base, newtype)
+
+-- Copy methods from the base type to the new type using the copy_methods macro
+
+##copy_methods(base.methods, newtype.methods)
+end 
+
+-- Returns the new record type created by the macro
+
+return newtype  
+end 
+
+-- Define an auxiliary macro that copies fields from one record to another
+
+macro copy_fields(from: type, to: type) 
+
+-- Loop through the fields of the source record using the pairs function
+
+for fieldname, fieldtype in pairs(from) do
+
+-- Ignore the name field
+
+if fieldname ~= 'name' then 
+
+-- Assign the same field and type to the destination record using the #[] syntax
+
+to#[fieldname] = fieldtype   
+   end 
+  end 
+end 
+
+-- Define an auxiliary macro that copies methods from one record to another
+
+macro copy_methods(from: table, to: table)
+
+-- Step through the source record methods using the pairs function
+
+for methodname, method in pairs(from) do
+
+-- Assign the same method to the target record using the syntax #[]
+
+to#[methodname] = method 
+  end   
+end 
+
+-- Define the Entity class using the new_record macro without passing a base type
+
+local Entity = ##new_record(nil, 'Entity')
+
+-- Define a components field in the Entity class to store the components attached to the entity
+
+Entity.components: {[string]: any}
+
+-- Define an init method on the Entity class to initialize the entity's components
+
+function Entity:init() 
+  self.components = {} 
+end 
+
+-- Define an addcomponent method on the Entity class to add a component to the entity
+
+function Entity:addcomponent(name: string, component: any) 
+  self.components[name] = component  
+end 
+
+-- Define a getcomponent method on the Entity class to get an entity component by name
+
+function Entity:getcomponent(name: string): any? 
+  return self.components[name] 
+end 
+
+-- Returns the Entity class defined by the code
+ 
+return Entity
+
+
+
+
+
+
+
+
+
+
